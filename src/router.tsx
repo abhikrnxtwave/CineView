@@ -9,6 +9,7 @@ import { SearchPage } from './Search/ui/pages/SearchPage'
 import { TVShowLayout, TVShowDetailPage, SeasonDetailPage } from './TVShows'
 import { RoutePlaceholderPage } from './pages/RoutePlaceholderPage'
 import { appRoutes } from './routes/routeConfig'
+import { SettingsPage } from './Preferences/ui/pages/SettingsPage'
 
 
 export const router = createBrowserRouter([
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: '/', element: <HomePage /> },
       { path: '/search', element: <SearchPage /> },
       { path: '/movies/:id', element: <MovieDetailPage /> },
+      { path: '/settings', element: <SettingsPage /> },
       {
         path: '/tv/:id',
         element: <TVShowLayout />,
@@ -40,7 +42,7 @@ export const router = createBrowserRouter([
       },
       // Keep placeholders for M5/M6 routes
       ...appRoutes
-        .filter((r) => !['/', '/search', '/movies/:id', '/tv/:id', '/tv/:id/season/:seasonNumber'].includes(r.path))
+        .filter((r) => !['/', '/search', '/movies/:id', '/tv/:id', '/tv/:id/season/:seasonNumber', '/settings'].includes(r.path))
         .map((config) => ({
           path: config.path,
           element: <RoutePlaceholderPage config={config} />,

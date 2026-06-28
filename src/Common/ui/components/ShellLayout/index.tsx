@@ -12,7 +12,7 @@ export const ShellLayout = () => {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-[#0a0a0a] text-white">
+    <div className="flex min-h-screen w-full flex-col bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
       <Navbar userDisplayName={username ?? 'User'} onLogout={handleLogout} />
       <main className="flex-1 w-full">
         <Outlet />

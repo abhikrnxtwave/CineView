@@ -23,20 +23,19 @@ export const Logo = ({ onClick, showText = true, compact = false }: LogoProps) =
     </div>
 
     {showText && !compact && (
-      <div className="flex flex-col leading-none">
-        <span className="text-base font-bold tracking-tight text-white sm:text-lg">
-          CineView
-        </span>
-        <span className="mt-0.5 hidden text-[10px] font-medium uppercase tracking-widest text-violet-400/80 sm:block">
-          Discover
-        </span>
-      </div>
-    )}
-
-    {showText && compact && (
-      <span className="text-base font-bold tracking-tight text-white">
-        CineView
-      </span>
-    )}
+  <div className="flex flex-col leading-none">
+    <span className="text-base font-bold tracking-tight text-slate-900 sm:text-lg dark:text-white">
+      CineView
+    </span>
+    <span className="mt-0.5 hidden text-[10px] font-medium uppercase tracking-widest text-violet-600/80 sm:block dark:text-violet-400/80">
+      Discover
+    </span>
+  </div>
+)}
+{showText && compact && (
+  <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+    CineView
+  </span>
+)}
   </NavLink>
 )

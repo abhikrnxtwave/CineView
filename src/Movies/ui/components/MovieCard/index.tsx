@@ -24,6 +24,6 @@ export const MovieCard = ({ movie, onClick }: Props) => (
         ★ {movie.vote_average.toFixed(1)}
       </span>
     </div>
-    <p className="mt-2 line-clamp-2 text-sm text-zinc-200">{movie.title}</p>
+    <p className="mt-2 line-clamp-2 text-sm text-slate-800 dark:text-zinc-200">{movie.title}</p>
   </div>
 )

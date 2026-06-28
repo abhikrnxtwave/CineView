@@ -28,7 +28,10 @@ export const TextInput = ({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-zinc-200">
+      <label
+        htmlFor={id}
+        className="text-sm font-medium text-slate-700 dark:text-zinc-200"
+      >
         {label}
       </label>
 
@@ -43,11 +46,12 @@ export const TextInput = ({
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
           className={[
-            'w-full rounded-xl border bg-zinc-900 px-4 py-3 text-base text-white placeholder:text-zinc-500 outline-none transition',
+            'w-full rounded-xl border bg-white px-4 py-3 text-base text-slate-900 placeholder:text-slate-400 outline-none transition',
+            'dark:bg-zinc-900 dark:text-white dark:placeholder:text-zinc-500',
             type === 'password' ? 'pr-11' : '',
             error
               ? 'border-red-500 focus:border-red-400 focus:ring-2 focus:ring-red-500/20'
-              : 'border-zinc-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20',
+              : 'border-slate-300 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 dark:border-zinc-700',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -58,10 +62,9 @@ export const TextInput = ({
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 transition hover:text-white focus:outline-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-slate-900 focus:outline-none dark:text-zinc-400 dark:hover:text-white"
           >
             {showPassword ? (
-              /* Eye-off */
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -76,7 +79,6 @@ export const TextInput = ({
                 />
               </svg>
             ) : (
-              /* Eye */
               <svg
                 className="h-5 w-5"
                 fill="none"
@@ -101,7 +103,7 @@ export const TextInput = ({
       </div>
 
       {error && (
-        <p id={`${id}-error`} className="text-xs text-red-400">
+        <p id={`${id}-error`} className="text-xs text-red-500 dark:text-red-400">
           {error}
         </p>
       )}

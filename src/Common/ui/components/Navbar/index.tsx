@@ -21,22 +21,22 @@ type NavbarProps = {
 const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
   `inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
     isActive
-      ? 'bg-violet-600/20 text-violet-300 shadow-sm shadow-violet-600/10'
-      : 'text-zinc-400 hover:bg-zinc-800/80 hover:text-white'
+      ? 'bg-violet-600/20 text-violet-600 shadow-sm shadow-violet-600/10 dark:text-violet-300'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800/80 dark:hover:text-white'
   }`
 
 const tabletLinkClass = ({ isActive }: { isActive: boolean }) =>
   `inline-flex items-center whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-medium transition ${
     isActive
-      ? 'bg-violet-600/20 text-violet-300'
-      : 'text-zinc-400 hover:bg-zinc-800/80 hover:text-white'
+      ? 'bg-violet-600/20 text-violet-600 dark:text-violet-300'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-400 dark:hover:bg-zinc-800/80 dark:hover:text-white'
   }`
 
 const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
   `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
     isActive
-      ? 'bg-violet-600/15 text-violet-300'
-      : 'text-zinc-300 hover:bg-zinc-800 hover:text-white'
+      ? 'bg-violet-600/15 text-violet-600 dark:text-violet-300'
+      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white'
   }`
 
 export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
@@ -91,49 +91,42 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
     runSearch(query)
   }
 
-  // Close menus on route change
   useEffect(() => {
     closeAllMenus()
   }, [location.pathname])
 
-    // Keep navbar input in sync with /search?q=...
   useEffect(() => {
     if (location.pathname !== '/search') return
     const q = new URLSearchParams(location.search).get('q') ?? ''
     setSearchQuery(q)
   }, [location.pathname, location.search])
 
-    // Clear search input when not on search page
-    useEffect(() => {
-      if (location.pathname !== '/search') {
-        setSearchQuery('')
-      }
-    }, [location.pathname])
+  useEffect(() => {
+    if (location.pathname !== '/search') {
+      setSearchQuery('')
+    }
+  }, [location.pathname])
 
-    // Debounced search — navigate while typing; go home when cleared
-    useEffect(() => {
-      const trimmed = searchQuery.trim()
-  
-      const timer = setTimeout(() => {
-        // Empty input → back to homepage if on search page
-        if (!trimmed) {
-          if (location.pathname === '/search') {
-            navigate('/', { replace: true })
-          }
-          return
+  useEffect(() => {
+    const trimmed = searchQuery.trim()
+
+    const timer = setTimeout(() => {
+      if (!trimmed) {
+        if (location.pathname === '/search') {
+          navigate('/', { replace: true })
         }
-  
-        const currentQ = new URLSearchParams(location.search).get('q') ?? ''
-        if (location.pathname === '/search' && currentQ === trimmed) return
-  
-        navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true })
-      }, DEBOUNCE_MS)
-  
-      return () => clearTimeout(timer)
-    }, [searchQuery, navigate, location.pathname, location.search])
+        return
+      }
 
+      const currentQ = new URLSearchParams(location.search).get('q') ?? ''
+      if (location.pathname === '/search' && currentQ === trimmed) return
 
-  // Lock body scroll when mobile menu is open
+      navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true })
+    }, DEBOUNCE_MS)
+
+    return () => clearTimeout(timer)
+  }, [searchQuery, navigate, location.pathname, location.search])
+
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? 'hidden' : ''
     return () => {
@@ -141,7 +134,6 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
     }
   }, [isMenuOpen])
 
-  // Close user menu on outside click
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (!menuRef.current?.contains(event.target as Node)) {
@@ -152,11 +144,10 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Render recent searches dropdown
   const renderRecentDropdown = () =>
     isSearchFocused && recentSearches.length > 0 ? (
-      <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
-        <p className="border-b border-zinc-800 px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+      <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-zinc-800 dark:bg-zinc-900">
+        <p className="border-b border-slate-200 px-3 py-2 text-xs font-medium uppercase tracking-wide text-slate-500 dark:border-zinc-800 dark:text-zinc-500">
           Recent searches
         </p>
         <ul>
@@ -166,9 +157,9 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleRecentSelect(item)}
-                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
               >
-                <SearchIcon className="h-4 w-4 shrink-0 text-zinc-500" />
+                <SearchIcon className="h-4 w-4 shrink-0 text-slate-400 dark:text-zinc-500" />
                 {item}
               </button>
             </li>
@@ -177,10 +168,9 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
       </div>
     ) : null
 
-  // Reusable search form helper
   const renderSearchForm = (className = '') => (
     <form onSubmit={handleSearchSubmit} className={`relative ${className}`}>
-      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
       <input
         type="search"
         value={searchQuery}
@@ -191,60 +181,54 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
         }}
         onBlur={() => setTimeout(() => setIsSearchFocused(false), 150)}
         placeholder="Search movies, shows, people..."
-        className="w-full rounded-xl border border-zinc-700/80 bg-zinc-900/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+        className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 dark:border-zinc-700/80 dark:bg-zinc-900/80 dark:text-white dark:placeholder:text-zinc-500"
       />
       {renderRecentDropdown()}
     </form>
   )
 
-  // Mobile drawer rendered via portal so it escapes header stacking context
   const mobileDrawer = isMenuOpen
     ? createPortal(
         <div className="fixed inset-0 z-[9999] md:hidden">
-          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70"
             onClick={closeAllMenus}
             aria-hidden="true"
           />
 
-          {/* Drawer panel — slides in from right */}
           <div
             id="mobile-menu"
             role="dialog"
             aria-modal="true"
             aria-label="Navigation menu"
-            className="absolute right-0 top-0 flex h-full w-[min(85vw,300px)] flex-col bg-[#0a0a0a] shadow-2xl shadow-black/60"
+            className="absolute right-0 top-0 flex h-full w-[min(85vw,300px)] flex-col bg-white shadow-2xl shadow-black/20 dark:bg-[#0a0a0a] dark:shadow-black/60"
           >
-            {/* Drawer header — user info + close */}
-            <div className="flex shrink-0 items-center justify-between border-b border-zinc-800 px-4 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 px-4 py-4 dark:border-zinc-800">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-700 text-sm font-semibold text-white">
                   {initials || 'U'}
                 </div>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-white">
+                  <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
                     {userDisplayName}
                   </p>
-                  <p className="text-xs text-zinc-500">Signed in</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-500">Signed in</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={closeAllMenus}
-                className="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-700 text-zinc-300 transition hover:bg-zinc-800"
+                className="ml-2 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-300 text-slate-600 transition hover:bg-slate-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 aria-label="Close menu"
               >
                 <CloseIcon />
               </button>
             </div>
 
-            {/* Search inside drawer */}
-            <div className="shrink-0 border-b border-zinc-800 px-4 py-3">
+            <div className="shrink-0 border-b border-slate-200 px-4 py-3 dark:border-zinc-800">
               {renderSearchForm()}
             </div>
 
-            {/* Nav links — scrollable */}
             <nav
               className="flex-1 overflow-y-auto px-3 py-3"
               aria-label="Mobile navigation"
@@ -257,21 +241,20 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
                   className={mobileLinkClass}
                   onClick={closeAllMenus}
                 >
-                  <span className="text-violet-400">{icon}</span>
+                  <span className="text-violet-600 dark:text-violet-400">{icon}</span>
                   <span>{label}</span>
                 </NavLink>
               ))}
             </nav>
 
-            {/* Logout footer */}
-            <div className="shrink-0 border-t border-zinc-800 p-4">
+            <div className="shrink-0 border-t border-slate-200 p-4 dark:border-zinc-800">
               <Button
                 variant="ghost"
                 onClick={() => {
                   closeAllMenus()
                   onLogout()
                 }}
-                className="w-full justify-center text-red-300 hover:bg-red-500/10"
+                className="w-full justify-center text-red-600 hover:bg-red-500/10 dark:text-red-300"
               >
                 Logout
               </Button>
@@ -284,10 +267,8 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-zinc-800/80 bg-[#0a0a0a]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white/90 backdrop-blur-md dark:border-zinc-800/80 dark:bg-[#0a0a0a]/90">
         <div className="mx-auto flex h-14 w-full max-w-[1600px] items-center gap-2 px-3 sm:h-16 sm:gap-3 sm:px-6 lg:px-8">
-
-          {/* Logo — compact on mobile, full on md+ */}
           <div className="md:hidden">
             <Logo onClick={closeAllMenus} showText compact />
           </div>
@@ -295,7 +276,6 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
             <Logo onClick={closeAllMenus} showText />
           </div>
 
-          {/* Desktop nav — lg+ */}
           <nav
             className="hidden items-center gap-1 lg:flex"
             aria-label="Main navigation"
@@ -308,7 +288,6 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
             ))}
           </nav>
 
-          {/* Tablet nav — md to lg */}
           <nav
             className="hidden min-w-0 flex-1 items-center gap-0.5 overflow-x-auto md:flex lg:hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             aria-label="Main navigation"
@@ -322,52 +301,49 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
 
           <div className="hidden flex-1 lg:block" />
 
-          {/* Search form — md+ (desktop + tablet) */}
           <div className="relative hidden min-w-0 flex-1 md:block lg:max-w-sm">
             {renderSearchForm()}
           </div>
 
-          {/* Right actions */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-
-            {/* Language — lg+ */}
             <button
               type="button"
               disabled
-              className="hidden h-10 items-center rounded-xl border border-zinc-700/80 px-3 text-xs font-medium text-zinc-400 lg:inline-flex"
+              className="hidden h-10 items-center rounded-xl border border-slate-300 px-3 text-xs font-medium text-slate-500 lg:inline-flex dark:border-zinc-700/80 dark:text-zinc-400"
               title="Language switcher coming in Milestone 4"
             >
               EN
             </button>
 
-            {/* User menu — md+ only (mobile uses drawer) */}
             <div className="relative hidden md:block" ref={menuRef}>
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className="flex h-10 items-center gap-2 rounded-xl border border-zinc-700/80 bg-zinc-900/50 px-2 transition hover:bg-zinc-800"
+                className="flex h-10 items-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-2 transition hover:bg-slate-100 dark:border-zinc-700/80 dark:bg-zinc-900/50 dark:hover:bg-zinc-800"
                 aria-label="User menu"
                 aria-expanded={isUserMenuOpen}
               >
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-700 text-xs font-semibold text-white">
                   {initials || 'U'}
                 </div>
-                <span className="hidden max-w-[88px] truncate text-sm text-zinc-300 md:block lg:max-w-[100px]">
+                <span className="hidden max-w-[88px] truncate text-sm text-slate-700 md:block lg:max-w-[100px] dark:text-zinc-300">
                   {userDisplayName}
                 </span>
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl shadow-black/40">
-                  <div className="border-b border-zinc-800 px-4 py-3">
-                    <p className="text-sm font-medium text-white">{userDisplayName}</p>
-                    <p className="text-xs text-zinc-500">Signed in</p>
+                <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl shadow-black/10 dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40">
+                  <div className="border-b border-slate-200 px-4 py-3 dark:border-zinc-800">
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">
+                      {userDisplayName}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-zinc-500">Signed in</p>
                   </div>
                   <div className="p-2">
                     <NavLink
                       to="/settings"
                       onClick={() => setIsUserMenuOpen(false)}
-                      className="block rounded-lg px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                      className="block rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white"
                     >
                       Settings
                     </NavLink>
@@ -377,7 +353,7 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
                         setIsUserMenuOpen(false)
                         onLogout()
                       }}
-                      className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-red-300 hover:bg-red-500/10"
+                      className="mt-1 w-full rounded-lg px-3 py-2 text-left text-sm text-red-600 hover:bg-red-500/10 dark:text-red-300"
                     >
                       Logout
                     </button>
@@ -386,10 +362,9 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
               )}
             </div>
 
-            {/* Hamburger — mobile only (<md) */}
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700/80 text-zinc-300 transition hover:bg-zinc-800 md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 text-slate-700 transition hover:bg-slate-100 md:hidden dark:border-zinc-700/80 dark:text-zinc-300 dark:hover:bg-zinc-800"
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
@@ -401,7 +376,6 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
         </div>
       </header>
 
-      {/* Mobile drawer — portaled to document.body to escape header stacking context */}
       {mobileDrawer}
     </>
   )
