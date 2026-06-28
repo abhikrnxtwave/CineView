@@ -1,0 +1,1 @@
+export { RECENT_SEARCHES_KEY, RECENT_SEARCHES_LIMIT } from '../../../Common/core/constants/Tmdb.constants'

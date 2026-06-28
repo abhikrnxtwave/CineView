@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { recentSearchService } from '../../../data/services/RecentSearchService'
 import { Logo } from '../Logo'
 import { Button } from '../Button'
 import {
@@ -9,6 +10,8 @@ import {
   NAV_ITEMS,
   SearchIcon,
 } from './NavIcons.tsx'
+
+import { DEBOUNCE_MS } from '../../../core/constants/Tmdb.constants'
 
 type NavbarProps = {
   userDisplayName: string
@@ -43,8 +46,11 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchFocused, setIsSearchFocused] = useState(false)
+  const [recentSearches, setRecentSearches] = useState<string[]>(() =>
+    recentSearchService.get(),
+  )
 
   const initials = userDisplayName
     .split(' ')
@@ -55,17 +61,34 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
   const closeAllMenus = () => {
     setIsMenuOpen(false)
     setIsUserMenuOpen(false)
-    setIsMobileSearchOpen(false)
+    setIsSearchFocused(false)
+  }
+
+  const runSearch = (query: string) => {
+    const trimmed = query.trim()
+    if (!trimmed) {
+      if (location.pathname === '/search') {
+        navigate('/', { replace: true })
+      }
+      return
+    }
+
+    recentSearchService.add(trimmed)
+    setRecentSearches(recentSearchService.get())
+    setSearchQuery(trimmed)
+    setIsSearchFocused(false)
+    closeAllMenus()
+    navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true })
   }
 
   const handleSearchSubmit = (event: React.FormEvent) => {
     event.preventDefault()
-    closeAllMenus()
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
-    } else {
-      navigate('/search')
-    }
+    runSearch(searchQuery)
+  }
+
+  const handleRecentSelect = (query: string) => {
+    setSearchQuery(query)
+    runSearch(query)
   }
 
   // Close menus on route change
@@ -73,13 +96,50 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
     closeAllMenus()
   }, [location.pathname])
 
-  // Lock body scroll when mobile menu or mobile search is open
+    // Keep navbar input in sync with /search?q=...
   useEffect(() => {
-    document.body.style.overflow = isMenuOpen || isMobileSearchOpen ? 'hidden' : ''
+    if (location.pathname !== '/search') return
+    const q = new URLSearchParams(location.search).get('q') ?? ''
+    setSearchQuery(q)
+  }, [location.pathname, location.search])
+
+    // Clear search input when not on search page
+    useEffect(() => {
+      if (location.pathname !== '/search') {
+        setSearchQuery('')
+      }
+    }, [location.pathname])
+
+    // Debounced search — navigate while typing; go home when cleared
+    useEffect(() => {
+      const trimmed = searchQuery.trim()
+  
+      const timer = setTimeout(() => {
+        // Empty input → back to homepage if on search page
+        if (!trimmed) {
+          if (location.pathname === '/search') {
+            navigate('/', { replace: true })
+          }
+          return
+        }
+  
+        const currentQ = new URLSearchParams(location.search).get('q') ?? ''
+        if (location.pathname === '/search' && currentQ === trimmed) return
+  
+        navigate(`/search?q=${encodeURIComponent(trimmed)}`, { replace: true })
+      }, DEBOUNCE_MS)
+  
+      return () => clearTimeout(timer)
+    }, [searchQuery, navigate, location.pathname, location.search])
+
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? 'hidden' : ''
     return () => {
       document.body.style.overflow = ''
     }
-  }, [isMenuOpen, isMobileSearchOpen])
+  }, [isMenuOpen])
 
   // Close user menu on outside click
   useEffect(() => {
@@ -91,6 +151,51 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // Render recent searches dropdown
+  const renderRecentDropdown = () =>
+    isSearchFocused && recentSearches.length > 0 ? (
+      <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 shadow-2xl">
+        <p className="border-b border-zinc-800 px-3 py-2 text-xs font-medium uppercase tracking-wide text-zinc-500">
+          Recent searches
+        </p>
+        <ul>
+          {recentSearches.map((item) => (
+            <li key={item}>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => handleRecentSelect(item)}
+                className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white"
+              >
+                <SearchIcon className="h-4 w-4 shrink-0 text-zinc-500" />
+                {item}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ) : null
+
+  // Reusable search form helper
+  const renderSearchForm = (className = '') => (
+    <form onSubmit={handleSearchSubmit} className={`relative ${className}`}>
+      <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+      <input
+        type="search"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        onFocus={() => {
+          setRecentSearches(recentSearchService.get())
+          setIsSearchFocused(true)
+        }}
+        onBlur={() => setTimeout(() => setIsSearchFocused(false), 150)}
+        placeholder="Search movies, shows, people..."
+        className="w-full rounded-xl border border-zinc-700/80 bg-zinc-900/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+      />
+      {renderRecentDropdown()}
+    </form>
+  )
 
   // Mobile drawer rendered via portal so it escapes header stacking context
   const mobileDrawer = isMenuOpen
@@ -136,17 +241,7 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
 
             {/* Search inside drawer */}
             <div className="shrink-0 border-b border-zinc-800 px-4 py-3">
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search movies, shows..."
-                  autoFocus
-                  className="w-full rounded-xl border border-zinc-700/80 bg-zinc-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500/30"
-                />
-              </form>
+              {renderSearchForm()}
             </div>
 
             {/* Nav links — scrollable */}
@@ -227,36 +322,13 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
 
           <div className="hidden flex-1 lg:block" />
 
-          {/* Desktop search — lg+ */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="relative hidden w-full max-w-sm lg:block"
-          >
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search movies, shows, people..."
-              className="w-full rounded-xl border border-zinc-700/80 bg-zinc-900/80 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
-            />
-          </form>
+          {/* Search form — md+ (desktop + tablet) */}
+          <div className="relative hidden min-w-0 flex-1 md:block lg:max-w-sm">
+            {renderSearchForm()}
+          </div>
 
           {/* Right actions */}
           <div className="ml-auto flex items-center gap-1.5 sm:gap-2">
-
-            {/* Tablet search toggle — md to lg only */}
-            <button
-              type="button"
-              onClick={() => {
-                setIsMobileSearchOpen((prev) => !prev)
-                setIsMenuOpen(false)
-              }}
-              className="hidden h-10 w-10 items-center justify-center rounded-xl border border-zinc-700/80 text-zinc-300 transition hover:bg-zinc-800 md:inline-flex lg:hidden"
-              aria-label="Toggle search"
-            >
-              <SearchIcon />
-            </button>
 
             {/* Language — lg+ */}
             <button
@@ -321,32 +393,12 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
               aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
-              onClick={() => {
-                setIsMenuOpen((prev) => !prev)
-                setIsMobileSearchOpen(false)
-              }}
+              onClick={() => setIsMenuOpen((prev) => !prev)}
             >
               {isMenuOpen ? <CloseIcon /> : <MenuIcon />}
             </button>
           </div>
         </div>
-
-        {/* Tablet search bar — md to lg only */}
-        {isMobileSearchOpen && (
-          <div className="border-t border-zinc-800 px-4 py-3 md:block lg:hidden">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-              <input
-                type="search"
-                autoFocus
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search movies, shows, people..."
-                className="w-full rounded-xl border border-zinc-700/80 bg-zinc-900 py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
-              />
-            </form>
-          </div>
-        )}
       </header>
 
       {/* Mobile drawer — portaled to document.body to escape header stacking context */}

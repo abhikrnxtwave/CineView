@@ -3,9 +3,13 @@ import { LoginPage } from './Auth'
 import { ProtectedRoute } from './Auth/ui/components/ProtectedRoute'
 import { GuestOnlyRoute } from './Auth/ui/components/GuestOnlyRoute'
 import { ShellLayout } from './Common'
-import { appRoutes } from './routes/routeConfig'
-import { RoutePlaceholderPage } from './pages/RoutePlaceholderPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { HomePage, MovieDetailPage } from './Movies'
+import { SearchPage } from './Search/ui/pages/SearchPage'
+import { TVShowLayout, TVShowDetailPage, SeasonDetailPage } from './TVShows'
+import { RoutePlaceholderPage } from './pages/RoutePlaceholderPage'
+import { appRoutes } from './routes/routeConfig'
+
 
 export const router = createBrowserRouter([
   {
@@ -23,10 +27,24 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      ...appRoutes.map((config) => ({
-        path: config.path,
-        element: <RoutePlaceholderPage config={config} />,
-      })),
+      { path: '/', element: <HomePage /> },
+      { path: '/search', element: <SearchPage /> },
+      { path: '/movies/:id', element: <MovieDetailPage /> },
+      {
+        path: '/tv/:id',
+        element: <TVShowLayout />,
+        children: [
+          { index: true, element: <TVShowDetailPage /> },
+          { path: 'season/:seasonNumber', element: <SeasonDetailPage /> },
+        ],
+      },
+      // Keep placeholders for M5/M6 routes
+      ...appRoutes
+        .filter((r) => !['/', '/search', '/movies/:id', '/tv/:id', '/tv/:id/season/:seasonNumber'].includes(r.path))
+        .map((config) => ({
+          path: config.path,
+          element: <RoutePlaceholderPage config={config} />,
+        })),
       { path: '*', element: <NotFoundPage /> },
     ],
   },

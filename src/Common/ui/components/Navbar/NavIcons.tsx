@@ -58,7 +58,6 @@ export type NavItem = {
   
   export const NAV_ITEMS: NavItem[] = [
     { to: '/', label: 'Home', end: true, icon: <HomeIcon /> },
-    { to: '/search', label: 'Search', icon: <SearchIcon /> },
     { to: '/watchlist', label: 'Watchlist', shortLabel: 'List', icon: <WatchlistIcon /> },
     { to: '/lists', label: 'My Lists', shortLabel: 'Lists', icon: <ListsIcon /> },
     { to: '/settings', label: 'Settings', shortLabel: 'Settings', icon: <SettingsIcon /> },

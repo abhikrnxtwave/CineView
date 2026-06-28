@@ -10,7 +10,7 @@ describe('SessionService', () => {
   })
 
   it('verifies valid credentials', () => {
-    expect(service.verifyCredentials('admin', 'admin123')).toBe(true)
+    expect(service.verifyCredentials('admin', 'admin@123')).toBe(true)
   })
 
   it('rejects invalid credentials', () => {
