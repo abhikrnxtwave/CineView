@@ -1,15 +1,17 @@
+import { observer } from 'mobx-react-lite'
 import { NavLink, Outlet, useParams } from 'react-router-dom'
 import { ErrorBoundary, PosterImage } from '../../../Common'
-import { WatchlistToggle } from '../../../Watchlist'
+import { MediaCollectionActions, ShowProgressBadge, useCollection } from '../../../Collection'
 import { useTVShowController } from '../controllers/useTVShowController'
 
 const seasonTabInactiveClass =
   'bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
 
-export const TVShowLayout = () => {
+export const TVShowLayout = observer(() => {
   const { id } = useParams()
   const showId = Number(id)
   const { show, status } = useTVShowController(showId)
+  const { isInWatchlist, getShowProgress } = useCollection()
 
   if (status === 'loading') {
     return (
@@ -34,6 +36,13 @@ export const TVShowLayout = () => {
     )
   }
 
+  const totalEpisodes = show.seasons
+    .filter((s) => s.season_number > 0)
+    .reduce((sum, s) => sum + s.episode_count, 0)
+
+  const showProgress = getShowProgress(show.id, totalEpisodes)
+  const onWatchlist = isInWatchlist('tv', show.id)
+
   return (
     <div className="pb-10">
       <ErrorBoundary>
@@ -49,7 +58,7 @@ export const TVShowLayout = () => {
               <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
                 {show.name}
               </h1>
-              <WatchlistToggle
+              <MediaCollectionActions
                 variant="detail"
                 mediaType="tv"
                 mediaId={show.id}
@@ -57,9 +66,15 @@ export const TVShowLayout = () => {
                   title: show.name,
                   posterPath: show.poster_path,
                   voteAverage: show.vote_average,
+                  totalEpisodes,
                 }}
               />
             </div>
+            {onWatchlist && totalEpisodes > 0 && (
+              <div className="mt-3">
+                <ShowProgressBadge watched={showProgress.watched} total={showProgress.total} />
+              </div>
+            )}
             <p className="mt-4 max-w-3xl text-slate-600 dark:text-zinc-300">
               {show.overview}
             </p>
@@ -88,4 +103,4 @@ export const TVShowLayout = () => {
       <Outlet context={{ show }} />
     </div>
   )
-}
+})

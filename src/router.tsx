@@ -9,7 +9,7 @@ import { SearchPage } from './Search/ui/pages/SearchPage'
 import { TVShowLayout, TVShowDetailPage, SeasonDetailPage } from './TVShows'
 import { RoutePlaceholderPage } from './pages/RoutePlaceholderPage'
 import { SettingsPage } from './Preferences'
-import { WatchlistPage } from './Watchlist'
+import { WatchlistPage, ListsPage, ListDetailPage } from './Collection'
 import { appRoutes } from './routes/routeConfig'
 
 const REGISTERED_PATHS = [
@@ -20,6 +20,8 @@ const REGISTERED_PATHS = [
   '/tv/:id/season/:seasonNumber',
   '/settings',
   '/watchlist',
+  '/lists',
+  '/lists/:listId',
 ]
 
 export const router = createBrowserRouter([
@@ -43,6 +45,8 @@ export const router = createBrowserRouter([
       { path: '/movies/:id', element: <MovieDetailPage /> },
       { path: '/settings', element: <SettingsPage /> },
       { path: '/watchlist', element: <WatchlistPage /> },
+      { path: '/lists', element: <ListsPage /> },
+      { path: '/lists/:listId', element: <ListDetailPage /> },
       {
         path: '/tv/:id',
         element: <TVShowLayout />,

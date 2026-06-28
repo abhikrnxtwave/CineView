@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react-lite'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../../Auth/data/hooks/useAuth'
-import { useWatchlist } from '../../../../Watchlist'
+import { useCollection } from '../../../../Collection'
 import { Navbar } from '../Navbar'
 
 export const ShellLayout = observer(() => {
   const navigate = useNavigate()
   const { username, logout } = useAuth()
-  const { totalCount } = useWatchlist()
+  const { totalCount } = useCollection()
 
   const handleLogout = () => {
     logout()

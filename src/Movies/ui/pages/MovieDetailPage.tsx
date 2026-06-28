@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ErrorBoundary, PosterImage, SectionState, TrailerModal } from '../../../Common'
-import { WatchlistToggle } from '../../../Watchlist'
+import { MediaCollectionActions } from '../../../Collection'
 import { ContentRow } from '../components/ContentRow'
 import { useMovieDetailController } from '../controllers/useMovieDetailController'
 
@@ -55,12 +55,12 @@ export const MovieDetailPage = () => {
               className="w-48 rounded-xl object-cover"
               size="posterLarge"
             />
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-start justify-between gap-4">
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
                   {movie.title}
                 </h1>
-                <WatchlistToggle
+                <MediaCollectionActions
                   variant="detail"
                   mediaType="movie"
                   mediaId={movie.id}
