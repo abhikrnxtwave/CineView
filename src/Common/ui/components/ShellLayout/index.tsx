@@ -1,10 +1,13 @@
+import { observer } from 'mobx-react-lite'
 import { Outlet, useNavigate } from 'react-router-dom'
-import { Navbar } from '../Navbar'
 import { useAuth } from '../../../../Auth/data/hooks/useAuth'
+import { useWatchlist } from '../../../../Watchlist'
+import { Navbar } from '../Navbar'
 
-export const ShellLayout = () => {
+export const ShellLayout = observer(() => {
   const navigate = useNavigate()
   const { username, logout } = useAuth()
+  const { totalCount } = useWatchlist()
 
   const handleLogout = () => {
     logout()
@@ -13,10 +16,14 @@ export const ShellLayout = () => {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-slate-50 text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
-      <Navbar userDisplayName={username ?? 'User'} onLogout={handleLogout} />
+      <Navbar
+        userDisplayName={username ?? 'User'}
+        onLogout={handleLogout}
+        watchlistCount={totalCount}
+      />
       <main className="flex-1 w-full">
         <Outlet />
       </main>
     </div>
   )
-}
+})

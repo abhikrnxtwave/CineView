@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useParams } from 'react-router-dom'
 import { ErrorBoundary, PosterImage } from '../../../Common'
+import { WatchlistToggle } from '../../../Watchlist'
 import { useTVShowController } from '../controllers/useTVShowController'
 
 const seasonTabInactiveClass =
@@ -43,10 +44,22 @@ export const TVShowLayout = () => {
             className="w-40 rounded-xl"
             size="posterLarge"
           />
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              {show.name}
-            </h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                {show.name}
+              </h1>
+              <WatchlistToggle
+                variant="detail"
+                mediaType="tv"
+                mediaId={show.id}
+                snapshot={{
+                  title: show.name,
+                  posterPath: show.poster_path,
+                  voteAverage: show.vote_average,
+                }}
+              />
+            </div>
             <p className="mt-4 max-w-3xl text-slate-600 dark:text-zinc-300">
               {show.overview}
             </p>

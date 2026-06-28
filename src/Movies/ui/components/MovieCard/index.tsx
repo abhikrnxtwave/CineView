@@ -1,5 +1,6 @@
-import { PosterImage, WatchlistTogglePlaceholder } from '../../../../Common'
+import { PosterImage } from '../../../../Common'
 import type { MovieSummary } from '../../../../Common/core/types/Tmdb.types'
+import { WatchlistToggle } from '../../../../Watchlist'
 
 type Props = {
   movie: MovieSummary
@@ -14,11 +15,19 @@ export const MovieCard = ({ movie, onClick }: Props) => (
         alt={movie.title}
         className="aspect-[2/3] w-full object-cover transition group-hover:scale-105"
       />
-        <div
+      <div
         className="absolute right-2 top-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <WatchlistTogglePlaceholder />
+        <WatchlistToggle
+          mediaType="movie"
+          mediaId={movie.id}
+          snapshot={{
+            title: movie.title,
+            posterPath: movie.poster_path,
+            voteAverage: movie.vote_average,
+          }}
+        />
       </div>
       <span className="absolute bottom-2 left-2 rounded bg-black/70 px-1.5 py-0.5 text-xs text-yellow-400">
         ★ {movie.vote_average.toFixed(1)}

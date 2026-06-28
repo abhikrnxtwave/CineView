@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ErrorBoundary, PosterImage, SectionState, TrailerModal, WatchlistTogglePlaceholder } from '../../../Common'
+import { ErrorBoundary, PosterImage, SectionState, TrailerModal } from '../../../Common'
+import { WatchlistToggle } from '../../../Watchlist'
 import { ContentRow } from '../components/ContentRow'
 import { useMovieDetailController } from '../controllers/useMovieDetailController'
 
@@ -59,7 +60,16 @@ export const MovieDetailPage = () => {
                 <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
                   {movie.title}
                 </h1>
-                <WatchlistTogglePlaceholder />
+                <WatchlistToggle
+                  variant="detail"
+                  mediaType="movie"
+                  mediaId={movie.id}
+                  snapshot={{
+                    title: movie.title,
+                    posterPath: movie.poster_path,
+                    voteAverage: movie.vote_average,
+                  }}
+                />
               </div>
               <p className="mt-2 text-yellow-500 dark:text-yellow-400">
                 ★ {movie.vote_average.toFixed(1)}

@@ -16,6 +16,7 @@ import { DEBOUNCE_MS } from '../../../core/constants/Tmdb.constants'
 type NavbarProps = {
   userDisplayName: string
   onLogout: () => void
+  watchlistCount?: number
 }
 
 const desktopLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -39,7 +40,28 @@ const mobileLinkClass = ({ isActive }: { isActive: boolean }) =>
       : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-white'
   }`
 
-export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
+const WatchlistBadge = ({ count }: { count: number }) =>
+  count > 0 ? (
+    <span className="ml-1 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-violet-600 px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+      {count > 99 ? '99+' : count}
+    </span>
+  ) : null
+
+const renderNavLabel = (to: string, label: string, watchlistCount = 0) =>
+  to === '/watchlist' ? (
+    <span className="inline-flex items-center">
+      {label}
+      <WatchlistBadge count={watchlistCount} />
+    </span>
+  ) : (
+    label
+  )
+
+export const Navbar = ({
+  userDisplayName,
+  onLogout,
+  watchlistCount = 0,
+}: NavbarProps) => {
   const navigate = useNavigate()
   const location = useLocation()
   const menuRef = useRef<HTMLDivElement>(null)
@@ -242,7 +264,7 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
                   onClick={closeAllMenus}
                 >
                   <span className="text-violet-600 dark:text-violet-400">{icon}</span>
-                  <span>{label}</span>
+                  <span>{renderNavLabel(to, label, watchlistCount)}</span>
                 </NavLink>
               ))}
             </nav>
@@ -283,7 +305,7 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
             {NAV_ITEMS.map(({ to, label, end, icon }) => (
               <NavLink key={to} to={to} end={end} className={desktopLinkClass}>
                 {icon}
-                <span>{label}</span>
+                <span>{renderNavLabel(to, label, watchlistCount)}</span>
               </NavLink>
             ))}
           </nav>
@@ -294,7 +316,7 @@ export const Navbar = ({ userDisplayName, onLogout }: NavbarProps) => {
           >
             {NAV_ITEMS.map(({ to, label, end }) => (
               <NavLink key={to} to={to} end={end} className={tabletLinkClass}>
-                {label}
+                {renderNavLabel(to, label, watchlistCount)}
               </NavLink>
             ))}
           </nav>
